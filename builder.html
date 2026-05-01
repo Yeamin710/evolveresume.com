@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolve Resume - Professional CV Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono:wght@400;700&family=Lora:wght@400;700&family=Playfair+Display:wght@700&family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;600;700&family=Open+Sans:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Poppins:wght@300;400;600;700&family=Oswald:wght@400;700&family=Raleway:wght@300;400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-family: 'Inter', sans-serif;
+            --base-font-size: 14px;
+            --header-align: left;
+            --side-bg: transparent;
+            --side-text: inherit;
+            --main-bg: transparent;
+            --main-text: inherit;
+        }
+
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease; }
+
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            height: auto;
+            padding: 0 !important;
+            margin: auto;
+            background: white !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+            transition: margin 0.3s ease;
+            color: #1e293b !important;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-pane { overflow-y: auto; background: #fcfcfc; height: calc(100vh - 64px); padding: 40px 0; transition: all 0.3s ease; }
+        .sidebar { background-color: #f8fafc; transition: background-color 0.3s ease; border-color: #e2e8f0; }
+
+        .section-item { cursor: grab; background: #fff; border: 1px solid #e2e8f0; margin-bottom: 8px; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+        .section-item:hover { border-color: #cbd5e1; }
+        .input-group { background: #fdfdfd; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .field-label { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        
+        .add-btn { color: #000; background: #ffffff; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; width: 100%; margin-top: 10px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
+        .add-btn:hover { background: #f1f5f9; border-color: #fcfcfc; }
+        .action-btn-sm { font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; transition: 0.2s;}
+        .action-btn-sm:hover { background: #f1f5f9; color: #000; border-color: #fcfcfc; }
+        .action-btn-danger { color: #ef4444 !important; border-color: #fca5a5 !important; background: #fef2f2 !important; }
+        .action-btn-danger:hover { background: #fee2e2 !important; color: #b91c1c !important; border-color: #f87171 !important; }
+
+        .format-toolbar { display: flex; flex-direction: column; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; }
+        .format-row { display: flex; align-items: center; gap: 4px; background: #ffffff; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; width: 100%; transition: 0.3s; }
+        .format-btn { border: 1px solid transparent; width: 26px; height: 26px; border-radius: 4px; font-size: 11px; font-weight: 600; background: transparent; color: #64748b; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center;}
+        .format-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .format-btn.active { background: #000 !important; color: white !important; border-color: #000 !important; }
+
+        /* DARK MODE */
+        .dark body { background-color: #0f172a; }
+        .dark .sidebar { background-color: #0f172a; border-color: #1e293b; }
+        .dark .bg-white { background-color: #1e293b; border-color: #334155; }
+        .dark .border-slate-200, .dark .border-slate-300 { border-color: #334155; }
+        .dark .text-slate-700 { color: #cbd5e1; }
+        .dark .text-slate-500, .dark .text-slate-400 { color: #fcfcfc; }
+        .dark .text-black { color: #ffffff; }
+        .dark .editor-input, .dark .editor-textarea { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
+        .dark .editor-input:focus, .dark .editor-textarea:focus { border-color: #64748b; }
+        .dark .section-item { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
+        .dark .input-group { background: #1e293b; border-color: #334155; }
+        .dark .format-toolbar { background: #0f172a; }
+        .dark .format-row { background: #1e293b; border-color: #334155; }
+        .dark .format-btn { color: #fcfcfc; }
+        .dark .format-btn:hover { background: #334155; color: #f8fafc; }
+        .dark .action-btn-sm { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+        .dark .action-btn-sm:hover { background: #334155; color: #fff; border-color: #475569; }
+        .dark .preview-pane { background: #020617; }
+        .dark #sidebarToggle { background: #1e293b; border-color: #334155; }
+        .dark #sidebarToggle svg { color: #fcfcfc; }
+        .dark #sidebarToggle:hover svg { color: #ffffff; }
+        .dark .add-btn { background: #1e293b; border-color: #334155; color: #fff; }
+        .dark .add-btn:hover { background: #334155; }
+        .dark .bg-slate-50 { background-color: #0f172a; }
+        .dark header { border-bottom-color: #1e293b; }
+
+        .avoid-break { page-break-inside: avoid; }
+        
+        .force-page-break { 
+            page-break-before: always;
+            break-before: page;
+            margin-top: 15mm; 
+            padding-top: 15mm; 
+            border-top: 2px dashed #ef4444; 
+            position: relative;
+        }
+        .force-page-break::before {
+            content: "✂ PAGE BREAK";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+        }
+
+        /* PDF GENERATION FIXES */
+        body.pdf-generating .a4-container {
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 0 !important; 
+            min-height: 296mm !important;
+        }
+
+        body.pdf-generating .cv-document {
+            min-height: 0 !important; 
+            margin-bottom: -5px !important;
+        }
+
+        body.pdf-generating .cv-document > *:last-child,
+        body.pdf-generating .cv-item:last-child {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        body.pdf-generating .force-page-break {
+            border-top: none !important;
+            padding-top: 20mm !important;
+            margin-top: 0 !important;
+        }
+        body.pdf-generating .force-page-break::before {
+            display: none !important;
+        }
+
+        /* VISUAL A4 PAGE BOUNDARY INDICATOR (Screen Only) */
+        @media screen {
+            .a4-container::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                pointer-events: none;
+                z-index: 50;
+                /* Draws a faint red line exactly at every 297mm interval to show page limits */
+                background-image: repeating-linear-gradient(
+                    to bottom,
+                    transparent,
+                    transparent calc(297mm - 3px),
+                    #ef4444 calc(297mm - 3px),
+                    #ef4444 297mm
+                );
+                opacity: 0.5;
+            }
+        }
+        
+        body.pdf-generating .a4-container::after {
+            display: none !important;
+        }
+
+        /* --- TEMPLATE STYLES --- */
+        .cv-document, .cv-document * { font-family: var(--font-family) !important; }
+        .cv-document { 
+            font-size: var(--base-font-size); 
+            line-height: 1.6; 
+            word-wrap: break-word; 
+            display: flex; 
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 20mm;
+        }
+
+        .template-modern.cv-document,
+        .template-creative.cv-document,
+        .template-twocol.cv-document,
+        .template-twocol-photo.cv-document {
+            padding: 0 !important;
+        }
+        
+        .cv-section-title { color: var(--section-color, #000000) !important; } 
+
+        /* MODERN TEMPLATE (TWO-COLUMN REDESIGN) */
+        .template-modern .col-side .cv-item,
+        .template-modern .col-side .cv-section-title,
+        .template-modern .col-side .skill-tag,
+        .template-modern .col-side strong,
+        .template-modern .col-side div {
+            color: inherit !important; 
+        }
+        .template-modern .col-side .cv-section-title {
+            color: inherit !important;
+            opacity: 0.9;
+            border-bottom: 1px solid currentColor;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.95em;
+            letter-spacing: 1px;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+        }
+        .template-modern .col-main .cv-section-title {
+            color: #0f172a !important;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            font-size: 1.4em;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+        }
+        .template-modern .col-side .skill-tag {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-size: 0.95em;
+            font-weight: normal;
+            display: inline;
+            border: none;
+            margin: 0;
+        }
+        .template-modern .col-side .skill-tag::after { content: ", "; }
+        .template-modern .col-side .skill-tag:last-child::after { content: ""; }
+
+        /* OTHER TEMPLATES */
+        .template-harvard .cv-header { text-align: var(--header-align); border-bottom: 1px solid #000; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .template-harvard h1 { text-transform: uppercase; letter-spacing: 2px; font-size: 2em; margin-bottom: 0.2em; color: var(--header-color, #000000) !important; }
+        .template-harvard .cv-section-title { text-transform: uppercase; font-weight: bold; border-bottom: 1px solid #000; margin: 1.2rem 0 0.8rem 0; font-size: 1.1em; }
+        .template-harvard .skill-tag { display: inline; background: none; border: none; padding: 0; margin-right: 8px; font-size: 1em; color: #000; }
+        .template-harvard .skill-tag::after { content: ","; }
+        .template-harvard .skill-tag:last-child::after { content: ""; }
+
+        .twocol-wrapper { display: flex; flex-direction: row; align-items: stretch; flex-grow: 1; }
+        
+        /* TWO COLUMN SHARED STYLES */
+        .col-side { width: 33%; flex-shrink: 0; background-color: var(--side-bg); color: var(--side-text); border-radius: 0; }
+        .col-main { width: 67%; background-color: var(--main-bg); color: var(--main-text); border-radius: 0; }
+        
+        .template-creative .col-side { width: 38%; }
+        .template-creative .col-main { width: 62%; }
+
+        .template-twocol .cv-header, .template-twocol-photo .cv-header { margin-bottom: 0; text-align: var(--header-align); padding: 20mm 20mm 10mm 20mm; }
+        .template-twocol .cv-section-title, .template-twocol-photo .cv-section-title { font-weight: bold; text-transform: uppercase; margin: 1.5rem 0 1rem 0; font-size: 1.1em; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.3rem;}
+        .template-twocol .skill-tag, .template-twocol-photo .skill-tag { background: transparent; border: 1px solid var(--section-color, #000000); color: var(--section-color, #000000); padding: 2px 8px; border-radius: 4px; font-size: 0.85em; display: inline-block; margin: 2px; }
+        
+        .template-minimalist .cv-header { margin-bottom: 3rem; text-align: var(--header-align); }
+        .template-minimalist h1 { font-weight: 300; font-size: 3em; letter-spacing: -1px; }
+        .template-minimalist .cv-section-title { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85em; margin: 2rem 0 1rem 0; }
+        .template-minimalist .skill-tag { color: #64748b; margin-right: 12px; font-size: 0.9em; }
+
+        .template-executive .cv-header { border-top: 4px solid var(--header-color, #000000); border-bottom: 4px solid var(--header-color, #000000); padding: 2rem 0; margin-bottom: 2rem; text-align: var(--header-align); background: #fafafa; }
+        .template-executive .cv-section-title { background: var(--section-color, #000000); color: white !important; padding: 4px 12px; text-transform: uppercase; font-weight: bold; font-size: 1em; margin: 1.5rem 0 1rem 0; }
+        .template-executive .skill-tag { font-weight: bold; padding: 0 8px; border-right: 1px solid #ccc; display: inline-block; }
+
+        .template-academic .cv-header { border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 2rem; text-align: var(--header-align); }
+        .template-academic .cv-section-title { font-weight: bold; text-transform: uppercase; margin: 2rem 0 1rem 0; font-size: 1.2em; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem;}
+        .template-academic .cv-item-grid { display: grid; grid-template-columns: 1fr 4fr; gap: 1rem; margin-bottom: 1rem; }
+        .template-academic .item-date-col { font-weight: 600; text-align: right; font-size: 0.9em; }
+
+        .template-europass .cv-header { border-bottom: 2px solid var(--header-color, #0e4194); padding-bottom: 1.5rem; margin-bottom: 1.5rem; text-align: var(--header-align); }
+        .template-europass .cv-section-title { font-weight: normal; color: var(--section-color, #0e4194) !important; border-bottom: 1px solid var(--section-color, #0e4194); margin: 1.5rem 0 1rem 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 0.3rem;}
+        .template-europass .cv-item-grid { display: grid; grid-template-columns: 1fr 3fr; gap: 1rem; margin-bottom: 1rem; }
+        .template-europass .item-date-col { font-weight: normal; color: var(--section-color, #0e4194); text-align: left; font-size: 0.95em; }
+
+        .template-europass-standard .cv-header { margin-bottom: 0; text-align: left; }
+        .template-europass-standard .skill-tag { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 0.85em; display: inline-block; margin-bottom: 4px; margin-right: 4px;}
+
+        .template-creative .cv-section-title { font-weight: bold !important; }
+
+        .template-biodata .cv-header { margin-bottom: 2rem; }
+        .template-biodata .cv-section-title { background-color: var(--section-color, #2563eb); color: white !important; padding: 8px 16px; font-weight: bold; text-transform: uppercase; margin: 1.5rem 0 1rem 0; font-size: 1.1em; letter-spacing: 0.5px; }
+        .template-biodata .biodata-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #1e293b;}
+        .template-biodata .biodata-table th, .template-biodata .biodata-table td { border: 1px solid #1e293b; padding: 8px; text-align: center; font-size: 0.95em; }
+        .template-biodata .biodata-table th { font-weight: bold; }
+        .template-biodata .biodata-personal-table { width: 100%; border-collapse: collapse; }
+        .template-biodata .biodata-personal-table td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; font-size: 0.95em; vertical-align: top;}
+        .template-biodata .biodata-personal-table td:first-child { font-weight: 700; width: 35%; color: #0f172a; }
+
+        .cv-photo-container { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--header-color, #000000); margin-bottom: 1.5rem; }
+        .cv-photo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .template-harvard .cv-photo-container { margin: 0 auto 1.5rem auto; }
+
+        #sidebar-content::-webkit-scrollbar { width: 5px; }
+        #sidebar-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark #sidebar-content::-webkit-scrollbar-thumb { background: #475569; }
+        .preview-pane::-webkit-scrollbar { width: 8px; }
+        .preview-pane::-webkit-scrollbar-thumb { background: #64748b; border-radius: 10px; }
+        
+        .editor-textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; resize: vertical; }
+        .editor-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-slate-50">
+
+    <header class="bg-white border-b px-6 py-3 flex justify-between items-center z-30 shrink-0 shadow-sm relative transition-colors duration-300">
+        <div class="flex items-center gap-6">
+            <a href="index.html" class="flex items-center gap-3 text-xl font-bold tracking-tight no-underline" style="text-decoration:none;">
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" style="filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5));">
+                        <rect x="5" y="5" width="90" height="90" rx="12" fill="#4ade80" />
+                        <rect x="20" y="20" width="25" height="25" rx="4" fill="white"/> 
+                        <rect x="55" y="20" width="25" height="6" rx="2" fill="white" fill-opacity="0.9"/>
+                        <rect x="55" y="32" width="25" height="6" rx="2" fill="white" fill-opacity="0.9"/>
+                        <rect x="55" y="44" width="15" height="6" rx="2" fill="white" fill-opacity="0.9"/>
+                        <rect x="20" y="62" width="60" height="8" rx="2" fill="white" fill-opacity="0.7"/>
+                        <rect x="20" y="77" width="60" height="8" rx="2" fill="white" fill-opacity="0.7"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-[#4ade80]" style="text-shadow: 0 0 10px rgba(74, 222, 128, 0.7);">Evolve</span> 
+                    <span class="text-black dark:text-white transition-colors duration-300">Resume</span>
+                </div>
+            </a>
+            
+            <!-- Auto-Save Pulse Indicator -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors">
+                <span class="relative flex h-2 w-2">
+                  <span id="save-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span id="save-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 transition-colors duration-300"></span>
+                </span>
+                <span id="save-status" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Saved draft</span>
+            </div>
+        </div>
+        
+        <div class="flex gap-2 items-center">
+            <!-- Reset Button -->
+            <button onclick="resetData()" title="Start Fresh" class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-sm border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 shadow-sm transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <span class="hidden md:inline">Reset</span>
+            </button>
+
+            <!-- Import Data Button -->
+            <button onclick="openImportModal()" title="Import raw text from CV or LinkedIn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                Import Data
+            </button>
+
+            <!-- Feedback Button -->
+            <button onclick="openFeedbackModal()" title="Share your feedback" class="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 shadow-sm transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                <span class="hidden md:inline">Feedback</span>
+            </button>
+
+            <!-- Download PDF -->
+            <button onclick="downloadPDF()" id="pdfBtn" class="flex items-center gap-1.5 bg-[#4ade80] hover:bg-[#22c55e] text-slate-900 px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-[#4ade80]/20 transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Download PDF
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <aside id="sidebar-container" class="sidebar h-full flex-shrink-0 transition-all duration-300 z-20 border-r overflow-hidden" style="width: 500px;">
+            <div id="sidebar-content" class="w-[500px] h-full overflow-y-auto p-6 space-y-8">
+                
+                <section class="bg-white p-5 rounded-xl border shadow-sm transition-colors duration-300">
+                    <h2 class="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-slate-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Global Settings</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="field-label">Template Style</span>
+                                <select id="templateSelector" onchange="changeTemplate(this.value)" class="editor-input font-medium bg-white w-full">
+                                    <option value="modern" selected>Modern (Two-Column)</option>
+                                    <option value="harvard">Harvard (Classic)</option>
+                                    <option value="twocol">Two-Column (No Photo)</option>
+                                    <option value="twocol-photo">Two-Column (With Photo)</option>
+                                    <option value="minimalist">Minimalist</option>
+                                    <option value="executive">Executive</option>
+                                    <option value="creative">Creative Sidebar</option>
+                                    <option value="academic">Academic CV</option>
+                                    <option value="europass">Europass</option>
+                                    <option value="europass-standard">Europass Standard</option>
+                                    <option value="biodata">Bio Data (Tabular)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <span class="field-label">Font Family</span>
+                                <select id="fontFamily" onchange="updateStyle()" class="editor-input bg-white w-full">
+                                    <optgroup label="Sans Serif">
+                                        <option value="'Inter', sans-serif" selected>Inter</option>
+                                        <option value="'Roboto', sans-serif">Roboto</option>
+                                        <option value="'Lato', sans-serif">Lato</option>
+                                        <option value="'Poppins', sans-serif">Poppins</option>
+                                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                                        <option value="'Open Sans', sans-serif">Open Sans</option>
+                                        <option value="'Oswald', sans-serif">Oswald</option>
+                                        <option value="'Raleway', sans-serif">Raleway</option>
+                                        <option value="'Nunito', sans-serif">Nunito</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="'Lora', serif">Lora</option>
+                                        <option value="'Merriweather', serif">Merriweather</option>
+                                        <option value="'Playfair Display', serif">Playfair Display</option>
+                                        <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                                    </optgroup>
+                                    <optgroup label="Monospace">
+                                        <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between">
+                                <span class="field-label">Base Font Size</span>
+                                <span id="fontSizeVal" class="text-[10px] font-bold text-slate-500">14px</span>
+                            </div>
+                            <input type="range" id="fontSize" min="11" max="18" value="14" oninput="updateStyle()" class="w-full accent-slate-800 dark:accent-slate-400">
+                        </div>
+                    </div>
+
+                    <div id="colColorSettings" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700" style="display: none;">
+                        <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer mb-3">
+                            <input type="checkbox" id="useCustomColColors" onchange="updateStyle()" class="accent-slate-800 dark:accent-slate-400 w-4 h-4">
+                            Enable Custom Column Colors
+                        </label>
+                        <div id="colColorPickers" class="grid grid-cols-2 gap-4" style="opacity: 0.4; pointer-events: none;">
+                            <div>
+                                <span class="field-label">Side Column BG</span>
+                                <input type="color" id="sideColBg" value="#f1f5f9" oninput="updateStyle()" class="w-full h-8 cursor-pointer rounded border border-slate-300">
+                            </div>
+                            <div>
+                                <span class="field-label">Side Col Text</span>
+                                <input type="color" id="sideColText" value="#1e293b" oninput="updateStyle()" class="w-full h-8 cursor-pointer rounded border border-slate-300">
+                            </div>
+                            <div>
+                                <span class="field-label">Main Column BG</span>
+                                <input type="color" id="mainColBg" value="#ffffff" oninput="updateStyle()" class="w-full h-8 cursor-pointer rounded border border-slate-300">
+                            </div>
+                            <div>
+                                <span class="field-label">Main Col Text</span>
+                                <input type="color" id="mainColText" value="#1e293b" oninput="updateStyle()" class="w-full h-8 cursor-pointer rounded border border-slate-300">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-700">Personal Details</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Header Color</span>
+                            <input type="color" id="headerColorPicker" value="#2563eb" oninput="data.personal.color = this.value; updateStyle(); render();" class="w-8 h-8 rounded cursor-pointer border border-slate-300 dark:border-slate-600 p-0 bg-transparent">
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Alignment</span>
+                            <div class="flex gap-1 bg-white dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600 p-0.5">
+                                <button onclick="setHeaderAlign('left')" id="hAlignLeft" class="format-btn active">⫷</button>
+                                <button onclick="setHeaderAlign('center')" id="hAlignCenter" class="format-btn">≡</button>
+                                <button onclick="setHeaderAlign('right')" id="hAlignRight" class="format-btn">⫸</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 bg-white p-4 rounded-xl border shadow-sm transition-colors duration-300">
+                            <div id="photoPreview" class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex-shrink-0 border border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs text-center p-2">
+                                No Photo
+                            </div>
+                            <div class="flex-1">
+                                <span class="field-label">Profile Photo (For supported templates)</span>
+                                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="text-[10px] w-full text-slate-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 dark:file:bg-slate-700 file:text-slate-700 dark:file:text-slate-200 hover:file:bg-slate-200 cursor-pointer">
+                                <button onclick="removePhoto()" class="text-[10px] text-red-500 mt-1 hover:underline font-medium">Remove Photo</button>
+                            </div>
+                        </div>
+
+                        <div id="personalInfoInputs" class="space-y-2"></div>
+                        <button onclick="addPersonalInfoField()" class="action-btn-sm w-full py-2 mt-2 shadow-sm">+ Add Custom Contact Field</button>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-700">Sections Layout</h2>
+                    </div>
+                    <div id="sectionSortable" class="mb-3"></div>
+                    <div class="flex gap-2">
+                        <button onclick="createNewSection('list')" class="add-btn flex-1">+ List</button>
+                        <button onclick="createNewSection('text')" class="add-btn flex-1">+ Text</button>
+                        <button onclick="createNewSection('tags')" class="add-btn flex-1">+ Tags</button>
+                    </div>
+
+                    <!-- Formatting Disclaimer -->
+                    <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 flex gap-2 items-start shadow-sm transition-colors duration-300">
+                        <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-[10px] text-blue-700 dark:text-blue-400 leading-relaxed">
+                            <strong>Formatting Tip:</strong> The faint red lines show the exact boundary of an A4 page. When your content crosses a red line, check the <strong>Spacing (+/-)</strong> option and <strong>Page Break</strong> box for that section to cleanly push it to the next page and maintain constant spacing.
+                        </p>
+                    </div>
+                </section>
+
+                <div id="dynamicSectionEditors" class="space-y-8 mt-8 border-t-2 border-dashed border-slate-300 pt-8"></div>
+                
+                <div class="pb-20"></div>
+            </div>
+        </aside>
+
+        <div id="sidebarToggle" onclick="toggleSidebar()" class="absolute left-[500px] top-1/2 -translate-y-1/2 z-30 bg-white border border-slate-300 border-l-0 shadow-md rounded-r-lg w-6 h-20 flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-slate-50 group">
+            <svg id="toggleIcon" class="w-4 h-4 text-slate-400 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+            </svg>
+        </div>
+
+        <section class="flex-1 preview-pane flex flex-col items-center" id="preview-scroll-area">
+            <div id="cv-container" class="a4-container">
+                <div id="cv-target" class="flex-auto w-full flex flex-col"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Smart Import
+                </h3>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                    Paste the text content of your old CV or LinkedIn profile below. Our browser-based parser will extract your Name, Title, Email, and Phone number automatically, and place the rest in an "Imported Data" block for you to organize.
+                </p>
+                <textarea id="importText" class="w-full h-64 p-4 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all" placeholder="Paste your CV text here...&#10;&#10;e.g.&#10;John Doe&#10;Software Engineer&#10;john.doe@email.com&#10;+1 (555) 123-4567&#10;&#10;Experience:&#10;- Built a scalable web app..."></textarea>
+            </div>
+            <div class="p-5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
+                <button onclick="closeImportModal()" class="px-5 py-2 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+                <button onclick="processImport()" class="px-5 py-2 rounded-xl font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md transition-all active:scale-95">Extract & Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700 h-[90vh] md:h-[80vh]">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    We Value Your Feedback!
+                </h3>
+                <button onclick="closeFeedbackModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-200 dark:bg-slate-700 rounded-full p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 w-full bg-slate-50 dark:bg-slate-900 overflow-hidden relative">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSctFj-CGQrW_aWMKnqsVAfhWmc93yx35EVXmrDAfqLlKGrUTQ/viewform?embedded=true" class="absolute inset-0 w-full h-full border-0" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STATE ---
+        let config = {
+            template: 'modern',
+            fontSize: '14px',
+            fontFamily: "'Inter', sans-serif",
+            headerAlign: 'left'
+        };
+
+        let sectionOrder = ['skills', 'profile', 'experience', 'education'];
+        
+        let data = {
+            personal: {
+                name: "Alex Jonathan",
+                title: "Senior Frontend Engineer",
+                photo: "",
+                color: "#2563eb",
+                details: [
+                    { label: "Email", value: "hello@alexjonathan.dev" },
+                    { label: "Phone", value: "+1 (555) 123-4567" },
+                    { label: "Location", value: "San Francisco, CA" },
+                    { label: "LinkedIn", value: "linkedin.com/in/alexj" }
+                ]
+            },
+            sections: {
+                profile: { 
+                    name: 'Profile', 
+                    type: 'text', 
+                    column: 'main',
+                    color: '#000000',
+                    content: 'Passionate Senior Frontend Engineer with 8+ years of experience building scalable, accessible, and performant web applications. Proven track record of leading UI architectures and mentoring engineering teams.',
+                    format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                    pageBreak: false
+                },
+                skills: {
+                    name: 'Skills',
+                    type: 'tags',
+                    column: 'side',
+                    color: '#000000',
+                    content: 'JavaScript (ES6+), HTML5, CSS3, TypeScript, React, Vue.js, Tailwind CSS, Next.js, Git, Webpack, Vite, Figma, Jest',
+                    format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                    pageBreak: false
+                },
+                experience: { 
+                    name: 'Experience', 
+                    type: 'list', 
+                    column: 'main',
+                    color: '#000000',
+                    format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                    pageBreak: false,
+                    items: [
+                        { title: 'Senior Frontend Engineer', company: 'TechNova Solutions', date: 'Jan 2020 - Present', desc: 'Led the migration of a legacy monolithic application to a React/Next.js micro-frontend architecture. Improved Lighthouse performance scores by 40% and reduced deployment times.' },
+                        { title: 'UI/UX Developer', company: 'Creative Digital', date: 'Mar 2016 - Dec 2019', desc: 'Developed responsive web interfaces using HTML5, CSS3, and Vanilla JS. Collaborated closely with design teams to establish a comprehensive design system.' }
+                    ] 
+                },
+                education: { 
+                    name: 'Education', 
+                    type: 'list', 
+                    column: 'main',
+                    color: '#000000',
+                    format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                    pageBreak: false,
+                    items: [
+                        { title: 'Bachelor of Science in Computer Science', company: 'University of Texas', date: '2012 - 2016', desc: 'Graduated with Honors. Specialized in Human-Computer Interaction.' }
+                    ] 
+                }
+            }
+        };
+
+        const INITIAL_STATE = JSON.stringify({config, sectionOrder, data});
+
+        // --- LOCAL STORAGE AUTO-SAVE ---
+        let saveTimeout;
+        function triggerAutoSave() {
+            clearTimeout(saveTimeout);
+            const statusMsg = document.getElementById('save-status');
+            const dot = document.getElementById('save-dot');
+            const ping = document.getElementById('save-ping');
+            
+            // Visual indication of saving
+            statusMsg.textContent = 'Saving...';
+            dot.classList.replace('bg-emerald-500', 'bg-amber-500');
+            ping.classList.replace('bg-emerald-400', 'bg-amber-400');
+            ping.classList.remove('hidden');
+
+            saveTimeout = setTimeout(() => {
+                const saveData = { config, sectionOrder, data };
+                try {
+                    localStorage.setItem('evolve_resume_autosave', JSON.stringify(saveData));
+                } catch(e) { console.error("Auto-save failed: ", e); }
+                
+                statusMsg.textContent = 'Saved draft';
+                dot.classList.replace('bg-amber-500', 'bg-emerald-500');
+                ping.classList.replace('bg-amber-400', 'bg-emerald-400');
+                
+                // Hide ping after a second
+                setTimeout(() => ping.classList.add('hidden'), 1000);
+            }, 800); // 800ms debounce
+        }
+
+        function loadAutoSave() {
+            const saved = localStorage.getItem('evolve_resume_autosave');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if(parsed.config) config = { ...config, ...parsed.config };
+                    if(parsed.sectionOrder) sectionOrder = [...parsed.sectionOrder];
+                    if(parsed.data) data = JSON.parse(JSON.stringify(parsed.data)); // Deep copy
+                    
+                    // Update UI Controls
+                    document.getElementById('templateSelector').value = config.template;
+                    document.getElementById('fontSize').value = parseInt(config.fontSize);
+                    document.getElementById('fontFamily').value = config.fontFamily;
+                    setHeaderAlign(config.headerAlign);
+                    
+                    const isTwoCol = ['twocol', 'twocol-photo', 'creative', 'modern'].includes(config.template);
+                    document.getElementById('colColorSettings').style.display = isTwoCol ? 'block' : 'none';
+                } catch(e) { console.error("Failed to load autosave", e); }
+            }
+        }
+
+        function resetData() {
+            if(!confirm("Are you sure you want to clear all data and start fresh? This cannot be undone.")) return;
+            
+            localStorage.removeItem('evolve_resume_autosave');
+            
+            const parsed = JSON.parse(INITIAL_STATE);
+            config = { ...parsed.config };
+            sectionOrder = [...parsed.sectionOrder];
+            data = JSON.parse(JSON.stringify(parsed.data));
+            
+            document.getElementById('templateSelector').value = config.template;
+            document.getElementById('fontSize').value = parseInt(config.fontSize);
+            document.getElementById('fontFamily').value = config.fontFamily;
+            document.getElementById('useCustomColColors').checked = false;
+            setHeaderAlign(config.headerAlign);
+            
+            updateStyle();
+            refreshUI();
+            triggerAutoSave();
+        }
+
+        // --- FEEDBACK MODAL LOGIC ---
+        function openFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('hidden');
+            document.getElementById('feedbackModal').classList.add('flex');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+            document.getElementById('feedbackModal').classList.remove('flex');
+        }
+
+        // --- IMPORT MODAL LOGIC ---
+        function openImportModal() {
+            document.getElementById('importModal').classList.remove('hidden');
+            document.getElementById('importModal').classList.add('flex');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+            document.getElementById('importModal').classList.remove('flex');
+            document.getElementById('importText').value = '';
+        }
+
+        function processImport() {
+            const text = document.getElementById('importText').value;
+            if (!text.trim()) return;
+
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            // Basic heuristics for extraction
+            const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+            const phoneRegex = /(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/;
+            
+            let extractedName = "";
+            let extractedTitle = "";
+            let extractedEmail = "";
+            let extractedPhone = "";
+            let remainingText = [];
+
+            // Assume first couple of lines without email/phone are name and title
+            for (let i = 0; i < Math.min(lines.length, 5); i++) {
+                if (!extractedName && !emailRegex.test(lines[i]) && !phoneRegex.test(lines[i])) {
+                    extractedName = lines[i];
+                    continue;
+                }
+                if (extractedName && !extractedTitle && !emailRegex.test(lines[i]) && !phoneRegex.test(lines[i])) {
+                    extractedTitle = lines[i];
+                    continue;
+                }
+            }
+
+            lines.forEach(line => {
+                let matched = false;
+                if (!extractedEmail && emailRegex.test(line)) {
+                    extractedEmail = line.match(emailRegex)[1];
+                    matched = true;
+                }
+                if (!extractedPhone && phoneRegex.test(line) && line.replace(/\D/g, '').length >= 7) {
+                    extractedPhone = line.match(phoneRegex)[0];
+                    matched = true;
+                }
+                
+                if (!matched && line !== extractedName && line !== extractedTitle) {
+                    remainingText.push(line);
+                }
+            });
+
+            // Update state
+            if (extractedName) data.personal.name = extractedName;
+            if (extractedTitle) data.personal.title = extractedTitle;
+            
+            if (extractedEmail) {
+                let emailField = data.personal.details.find(d => d.label.toLowerCase().includes('email'));
+                if (emailField) emailField.value = extractedEmail;
+                else data.personal.details.push({ label: 'Email', value: extractedEmail });
+            }
+            if (extractedPhone) {
+                let phoneField = data.personal.details.find(d => d.label.toLowerCase().includes('phone'));
+                if (phoneField) phoneField.value = extractedPhone;
+                else data.personal.details.push({ label: 'Phone', value: extractedPhone });
+            }
+
+            if (remainingText.length > 0) {
+                const id = 'import_' + Date.now();
+                data.sections[id] = { 
+                    name: 'Imported Data', type: 'text', column: 'main', color: '#000000',
+                    content: remainingText.join('\n\n'),
+                    format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                    pageBreak: false
+                };
+                sectionOrder.push(id);
+                setTimeout(() => {
+                    document.getElementById('sidebar-content').scrollTo({ top: document.getElementById('sidebar-content').scrollHeight, behavior: 'smooth' });
+                }, 100);
+            }
+
+            closeImportModal();
+            refreshUI();
+            triggerAutoSave();
+        }
+
+        let isSidebarOpen = true;
+        function toggleSidebar() {
+            isSidebarOpen = !isSidebarOpen;
+            const sidebar = document.getElementById('sidebar-container');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (isSidebarOpen) {
+                sidebar.style.width = '500px';
+                toggleBtn.style.left = '500px';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />';
+            } else {
+                sidebar.style.width = '0px';
+                toggleBtn.style.left = '0px';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />';
+            }
+        }
+
+        function changeTemplate(tplId) {
+            config.template = tplId;
+            const isTwoCol = ['twocol', 'twocol-photo', 'creative', 'modern'].includes(tplId);
+            document.getElementById('colColorSettings').style.display = isTwoCol ? 'block' : 'none';
+            updateStyle();
+            renderEditors();
+            render();
+        }
+
+        function setHeaderAlign(val) {
+            config.headerAlign = val;
+            document.getElementById('hAlignLeft').classList.toggle('active', val === 'left');
+            document.getElementById('hAlignCenter').classList.toggle('active', val === 'center');
+            document.getElementById('hAlignRight').classList.toggle('active', val === 'right');
+            updateStyle();
+        }
+
+        function updateStyle() {
+            config.fontFamily = document.getElementById('fontFamily').value;
+            config.fontSize = document.getElementById('fontSize').value + 'px';
+            document.getElementById('fontSizeVal').innerText = config.fontSize;
+            document.documentElement.style.setProperty('--font-family', config.fontFamily);
+            document.documentElement.style.setProperty('--base-font-size', config.fontSize);
+            document.documentElement.style.setProperty('--header-align', config.headerAlign);
+
+            const customColEnabled = document.getElementById('useCustomColColors').checked;
+            const tpl = document.getElementById('templateSelector').value;
+
+            if (customColEnabled) {
+                document.getElementById('colColorPickers').style.opacity = '1';
+                document.getElementById('colColorPickers').style.pointerEvents = 'auto';
+                document.documentElement.style.setProperty('--side-bg', document.getElementById('sideColBg').value);
+                document.documentElement.style.setProperty('--side-text', document.getElementById('sideColText').value);
+                document.documentElement.style.setProperty('--main-bg', document.getElementById('mainColBg').value);
+                document.documentElement.style.setProperty('--main-text', document.getElementById('mainColText').value);
+            } else {
+                document.getElementById('colColorPickers').style.opacity = '0.4';
+                document.getElementById('colColorPickers').style.pointerEvents = 'none';
+                if (tpl === 'creative') {
+                    document.documentElement.style.setProperty('--side-bg', '#1e293b');
+                    document.documentElement.style.setProperty('--side-text', '#ffffff');
+                    document.documentElement.style.setProperty('--main-bg', 'transparent');
+                    document.documentElement.style.setProperty('--main-text', 'inherit');
+                } else if (tpl === 'modern') {
+                    document.documentElement.style.setProperty('--side-bg', data.personal.color || '#2563eb');
+                    document.documentElement.style.setProperty('--side-text', 'rgba(255,255,255,0.9)');
+                    document.documentElement.style.setProperty('--main-bg', 'transparent');
+                    document.documentElement.style.setProperty('--main-text', '#1e293b');
+                } else {
+                    document.documentElement.style.setProperty('--side-bg', 'transparent');
+                    document.documentElement.style.setProperty('--side-text', 'inherit');
+                    document.documentElement.style.setProperty('--main-bg', 'transparent');
+                    document.documentElement.style.setProperty('--main-text', 'inherit');
+                }
+            }
+            render();
+        }
+
+        function adjustSpacing(id, delta) {
+            let current = data.sections[id].format.spacing;
+            if (current === undefined) current = 24;
+            data.sections[id].format.spacing = Math.max(0, current + delta);
+            renderEditors();
+            render();
+        }
+
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 300;
+                    let width = img.width, height = img.height;
+                    if (width > height) {
+                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                    } else {
+                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    data.personal.photo = canvas.toDataURL('image/jpeg', 0.9);
+                    refreshUI();
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() { data.personal.photo = ""; refreshUI(); }
+
+        function addPersonalInfoField() {
+            data.personal.details.push({ label: "New Field", value: "" });
+            refreshUI();
+        }
+
+        function removePersonalInfoField(index) {
+            data.personal.details.splice(index, 1);
+            refreshUI();
+        }
+
+        function createNewSection(type) {
+            const id = 'custom_' + Date.now();
+            let defaultContent = type === 'list' ? [] : (type === 'tags' ? 'Tag 1, Tag 2' : 'Your content here...');
+            if(type === 'list') defaultContent.push({title: 'Title', company: 'Company', date: 'Date', desc: 'Description'});
+            data.sections[id] = { 
+                name: 'New Section', type: type, column: 'main', color: '#000000',
+                content: type !== 'list' ? defaultContent : undefined,
+                items: type === 'list' ? defaultContent : undefined,
+                format: { bold: false, italic: false, underline: false, titleAlign: 'left', align: 'left', spacing: 24 },
+                pageBreak: false
+            };
+            sectionOrder.push(id);
+            refreshUI();
+            setTimeout(() => {
+                document.getElementById('sidebar-content').scrollTo({ top: document.getElementById('sidebar-content').scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+
+        function removeSection(id) {
+            if(confirm("Are you sure you want to delete this section?")) {
+                delete data.sections[id];
+                sectionOrder = sectionOrder.filter(sid => sid !== id);
+                refreshUI();
+            }
+        }
+
+        function moveListItem(sectionId, index, dir) {
+            const arr = data.sections[sectionId].items;
+            if (dir === -1 && index > 0) [arr[index-1], arr[index]] = [arr[index], arr[index-1]];
+            else if (dir === 1 && index < arr.length - 1) [arr[index+1], arr[index]] = [arr[index], arr[index+1]];
+            renderEditors(); render();
+        }
+
+        function refreshUI() {
+            const photoEl = document.getElementById('photoPreview');
+            photoEl.innerHTML = data.personal.photo
+                ? `<img src="${data.personal.photo}" class="w-full h-full object-cover">`
+                : `No Photo`;
+            document.getElementById('headerColorPicker').value = data.personal.color || '#2563eb';
+            renderPersonalInfoInputs();
+            renderSortable();
+            renderEditors();
+            render();
+        }
+
+        function renderPersonalInfoInputs() {
+            const container = document.getElementById('personalInfoInputs');
+            let html = `
+                <div class="mb-2">
+                    <span class="field-label">Full Name</span>
+                    <input type="text" value="${data.personal.name}" oninput="data.personal.name = this.value; render();" class="editor-input font-bold bg-white">
+                </div>
+                <div class="mb-3">
+                    <span class="field-label">Professional Title</span>
+                    <input type="text" value="${data.personal.title}" oninput="data.personal.title = this.value; render();" class="editor-input bg-white">
+                </div>
+                <span class="field-label border-t border-slate-200 dark:border-slate-700 pt-2">Contact Details</span>
+            `;
+            data.personal.details.forEach((field, i) => {
+                html += `
+                    <div class="flex gap-2 items-center group mb-1">
+                        <input type="text" value="${field.label}" oninput="data.personal.details[${i}].label = this.value; render();" class="w-24 editor-input text-xs bg-slate-50" placeholder="Label">
+                        <input type="text" value="${field.value}" oninput="data.personal.details[${i}].value = this.value; render();" class="flex-1 editor-input text-xs bg-white" placeholder="Value">
+                        <button onclick="removePersonalInfoField(${i})" class="text-red-400 hover:text-red-600 font-bold px-2 py-1 text-lg leading-none" title="Remove">&times;</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderSortable() {
+            const container = document.getElementById('sectionSortable');
+            container.innerHTML = sectionOrder.map(id => {
+                const s = data.sections[id];
+                return `
+                <div class="section-item shadow-sm" data-id="${id}">
+                    <span class="text-slate-300 dark:text-slate-600 cursor-grab px-1">☰</span>
+                    <span class="text-xs font-bold truncate flex-1">${s.name} <span class="text-[9px] font-normal text-slate-400 ml-1">(${s.type})</span></span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderEditors() {
+            const container = document.getElementById('dynamicSectionEditors');
+            const isTwoCol = ['twocol', 'twocol-photo', 'creative', 'modern'].includes(config.template);
+
+            container.innerHTML = sectionOrder.map(id => {
+                const s = data.sections[id];
+                const f = s.format;
+                const spacing = f.spacing !== undefined ? f.spacing : 24;
+                const titleAlign = f.titleAlign || 'left';
+                const sColor = s.color || '#000000';
+                
+                let colSelector = '';
+                if(isTwoCol) {
+                    colSelector = `
+                        <select onchange="data.sections['${id}'].column = this.value; render();" class="action-btn-sm ml-2 outline-none border-slate-300 shadow-sm bg-white font-bold">
+                            <option value="main" ${s.column === 'main' ? 'selected' : ''}>Main Column</option>
+                            <option value="side" ${s.column === 'side' ? 'selected' : ''}>Side Column</option>
+                        </select>`;
+                }
+
+                let controls = `
+                    <div class="format-toolbar shadow-inner">
+                        <div class="format-row">
+                            <span class="text-[9px] font-bold text-slate-500 uppercase w-[70px] text-right mr-1">Text Style</span>
+                            <button onclick="toggleFormat('${id}', 'bold')" class="format-btn ${f.bold ? 'active' : ''}"><b>B</b></button>
+                            <button onclick="toggleFormat('${id}', 'italic')" class="format-btn ${f.italic ? 'active' : ''}"><i>I</i></button>
+                            <button onclick="toggleFormat('${id}', 'underline')" class="format-btn ${f.underline ? 'active' : ''}"><u>U</u></button>
+                            <div class="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                            <button onclick="setAlign('${id}', 'left')" class="format-btn ${f.align === 'left' ? 'active' : ''}">⫷</button>
+                            <button onclick="setAlign('${id}', 'center')" class="format-btn ${f.align === 'center' ? 'active' : ''}">≡</button>
+                            <button onclick="setAlign('${id}', 'right')" class="format-btn ${f.align === 'right' ? 'active' : ''}">⫸</button>
+                        </div>
+                        <div class="format-row justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center">
+                                    <span class="text-[9px] font-bold text-slate-500 uppercase w-[40px] text-right mr-2">Color</span>
+                                    <input type="color" value="${sColor}" oninput="data.sections['${id}'].color = this.value; render();" class="w-6 h-6 rounded cursor-pointer border border-slate-300 dark:border-slate-600 p-0 bg-transparent">
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-[9px] font-bold text-slate-500 uppercase text-right mr-2 ml-2">Spacing</span>
+                                    <button onclick="adjustSpacing('${id}', -4)" class="action-btn-sm px-1.5 py-0.5 rounded-l border-r-0 hover:bg-slate-100 dark:hover:bg-slate-600">-</button>
+                                    <span class="text-[10px] w-6 text-center font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border-y border-cbd5e1 dark:border-slate-700 py-0.5">${spacing}</span>
+                                    <button onclick="adjustSpacing('${id}', 4)" class="action-btn-sm px-1.5 py-0.5 rounded-r border-l-0 hover:bg-slate-100 dark:hover:bg-slate-600">+</button>
+                                </div>
+                            </div>
+                            <label class="flex items-center gap-1.5 text-[10px] font-bold text-red-500 cursor-pointer hover:text-red-700 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded border border-red-100 dark:border-red-900/50 transition-colors">
+                                <input type="checkbox" ${s.pageBreak ? 'checked' : ''} onchange="data.sections['${id}'].pageBreak = this.checked; render();" class="accent-red-600">
+                                Page Break
+                            </label>
+                        </div>
+                    </div>
+                `;
+
+                let inner = '';
+                if (s.type === 'list') {
+                    inner = s.items.map((item, i) => `
+                        <div class="input-group">
+                            <div class="flex justify-between items-center mb-2 border-b border-slate-100 dark:border-slate-700 pb-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item ${i+1}</span>
+                                <div class="flex gap-1">
+                                    <button onclick="moveListItem('${id}', ${i}, -1)" class="action-btn-sm py-0.5 px-2" ${i===0?'disabled opacity-50':''}>↑</button>
+                                    <button onclick="moveListItem('${id}', ${i}, 1)" class="action-btn-sm py-0.5 px-2" ${i===s.items.length-1?'disabled opacity-50':''}>↓</button>
+                                    <button onclick="data.sections['${id}'].items.splice(${i},1); renderEditors(); render();" class="action-btn-sm action-btn-danger ml-2">Delete</button>
+                                </div>
+                            </div>
+                            <input type="text" value="${item.title}" oninput="data.sections['${id}'].items[${i}].title = this.value; render();" class="editor-input mb-2 font-bold" placeholder="Role / Degree">
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" value="${item.company}" oninput="data.sections['${id}'].items[${i}].company = this.value; render();" class="editor-input flex-1" placeholder="Company / Institution">
+                                <input type="text" value="${item.date}" oninput="data.sections['${id}'].items[${i}].date = this.value; render();" class="editor-input w-28" placeholder="Date Period">
+                            </div>
+                            <textarea oninput="data.sections['${id}'].items[${i}].desc = this.value; render();" class="editor-textarea" rows="3" placeholder="Description...">${item.desc}</textarea>
+                        </div>
+                    `).join('');
+                    inner += `<button onclick="data.sections['${id}'].items.push({title:'',company:'',date:'',desc:''}); renderEditors(); render();" class="add-btn mt-2 border-dashed border-2 bg-transparent hover:bg-slate-50 text-slate-500">+ Add Item</button>`;
+                } else if (s.type === 'tags') {
+                    inner = `<textarea oninput="data.sections['${id}'].content = this.value; render();" class="editor-textarea" rows="2" placeholder="Comma separated tags">${s.content}</textarea>`;
+                } else {
+                    inner = `<textarea oninput="data.sections['${id}'].content = this.value; render();" class="editor-textarea" rows="4" placeholder="Enter paragraph text...">${s.content}</textarea>`;
+                }
+
+                return `
+                    <div class="bg-white p-5 border rounded-xl shadow-md relative group transition-colors duration-300">
+                        <div class="flex justify-between items-center mb-4">
+                             <div class="flex gap-1 items-center w-1/2">
+                                 <input type="text" value="${s.name}" oninput="data.sections['${id}'].name = this.value; render(); renderSortable();" class="font-black text-sm uppercase tracking-wide bg-transparent border-none p-0 focus:ring-0 w-full outline-none border-b border-dashed border-transparent hover:border-slate-300 focus:border-slate-500 text-slate-800 dark:text-slate-100">
+                             </div>
+                             <div class="flex items-center">
+                                <div class="flex gap-0.5 bg-slate-100 dark:bg-slate-800 rounded p-0.5 mr-2">
+                                    <button onclick="setTitleAlign('${id}', 'left')" class="action-btn-sm py-1 px-1.5 ${titleAlign === 'left' ? 'bg-black text-white dark:bg-white dark:text-black' : ''}">⫷</button>
+                                    <button onclick="setTitleAlign('${id}', 'center')" class="action-btn-sm py-1 px-1.5 ${titleAlign === 'center' ? 'bg-black text-white dark:bg-white dark:text-black' : ''}">≡</button>
+                                    <button onclick="setTitleAlign('${id}', 'right')" class="action-btn-sm py-1 px-1.5 ${titleAlign === 'right' ? 'bg-black text-white dark:bg-white dark:text-black' : ''}">⫸</button>
+                                </div>
+                                ${colSelector}
+                                <button onclick="removeSection('${id}')" class="action-btn-sm action-btn-danger ml-3">Delete</button>
+                             </div>
+                        </div>
+                        ${controls}
+                        <div class="mt-3">${inner}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFormat(id, prop) { data.sections[id].format[prop] = !data.sections[id].format[prop]; renderEditors(); render(); }
+        function setAlign(id, val) { data.sections[id].format.align = val; renderEditors(); render(); }
+        function setTitleAlign(id, val) { data.sections[id].format.titleAlign = val; renderEditors(); render(); }
+
+        function renderHeaderContent(tpl) {
+            const p = data.personal;
+            let contactHtml = p.details.filter(d => d.value.trim() !== "").map(d => `<span style="word-break: break-word;"><span class="font-bold opacity-80">${d.label}:</span> ${d.value}</span>`).join(' <span class="mx-2 opacity-40">•</span> ');
+
+            let photoHtml = '';
+            if (p.photo && (tpl === 'twocol-photo' || tpl === 'harvard')) {
+                photoHtml = `<div class="cv-photo-container"><img src="${p.photo}"></div>`;
+            }
+
+            const align = config.headerAlign || 'left';
+            const flexJustify = align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start');
+            const hColor = p.color || '#000000';
+
+            if(tpl === 'minimalist') {
+                return `${photoHtml}<h1 style="color: ${hColor}; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1><div style="font-weight: 600; font-size: 1.2em; color: ${hColor}; margin-top: 5px;">${p.title}</div><div style="margin-top: 15px; font-size: 0.9em; color: inherit; opacity: 0.8; line-height: 1.8;">${contactHtml.replace(/•/g, '<br>')}</div>`;
+            }
+            if(tpl === 'executive') {
+                return `<h1 style="font-size: 2.5em; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: ${hColor}; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1><div style="font-size: 1.1em; letter-spacing: 1px; color: inherit; opacity: 0.8; margin-bottom: 15px;">${p.title}</div><div style="font-size: 0.85em; display: flex; flex-wrap: wrap; gap: 5px; justify-content: ${flexJustify};">${contactHtml}</div>`;
+            }
+            if(tpl === 'europass') {
+                const photoHtmlEuropass = p.photo ? `<div class="cv-photo-container" style="margin: 0; border-radius: 0; border: none; width: 130px; height: 160px; flex-shrink: 0;"><img src="${p.photo}" style="border-radius: 0; width: 100%; height: 100%; object-fit: cover;"></div>` : '';
+                const europassContactHtml = p.details.filter(d => d.value.trim() !== "").map(d => `<span style="word-break: break-word;"><strong style="color: ${hColor};">${d.label}:</strong> ${d.value}</span>`).join('<span style="margin: 0 8px; opacity: 0.5;">|</span>');
+                const containerFlexDir = align === 'center' ? 'column' : (align === 'right' ? 'row-reverse' : 'row');
+                const containerAlign = align === 'center' ? 'center' : 'flex-start';
+
+                return `
+                <div style="display: flex; gap: 2rem; align-items: ${containerAlign}; justify-content: ${flexJustify}; flex-direction: ${containerFlexDir};">
+                    ${photoHtmlEuropass}
+                    <div style="flex: 1; text-align: ${align}; width: 100%;">
+                        <h1 style="font-size: 2.2em; font-weight: normal; color: ${hColor}; margin-bottom: 5px; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1>
+                        <div style="font-size: 1.1em; color: inherit; margin-bottom: 15px;">${p.title}</div>
+                        <div style="font-size: 0.9em; display: flex; flex-wrap: wrap; gap: 5px; justify-content: ${flexJustify};">
+                            ${europassContactHtml}
+                        </div>
+                    </div>
+                </div>`;
+            }
+            if(tpl === 'europass-standard') {
+                const contactHtmlStd = p.details.filter(d => d.value.trim() !== "").map(d => `<span style="white-space: nowrap;">${d.value}</span>`).join('<span style="margin: 0 10px; color: #fcfcfc;">|</span>');
+                
+                return `
+                <div style="display: grid; grid-template-columns: 25% 75%; gap: 20px;">
+                    <div style="text-align: right; border-right: 1px solid #e2e8f0; padding-right: 20px; padding-bottom: 30px;">
+                        ${p.photo ? `<img src="${p.photo}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; float: right;">` : ''}
+                    </div>
+                    <div style="padding-left: 0; padding-bottom: 30px;">
+                        <div style="border-left: 3px solid ${hColor}; padding-left: 15px;">
+                            <h1 style="font-size: 2.5em; font-weight: 700; color: #0f172a; margin: 0 0 5px 0; line-height: 1; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1>
+                            <div style="font-size: 1.1em; color: #64748b; margin-bottom: 12px;">${p.title}</div>
+                            <div style="font-size: 0.85em; color: #475569; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
+                                ${contactHtmlStd}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            if(tpl === 'biodata') {
+                const align = config.headerAlign || 'left';
+                const isReversed = align === 'right';
+                const flexDir = isReversed ? 'row-reverse' : 'row';
+                
+                const photoBox = p.photo 
+                    ? `<div style="width: 150px; height: 180px; border-radius: 4px; border: 2px solid #e2e8f0; overflow: hidden; margin: 0; background: #fff; padding: 4px;"><img src="${p.photo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;"></div>`
+                    : `<div style="width: 150px; height: 180px; border: 2px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; color: #fcfcfc; font-size: 0.85em; border-radius: 4px;">Photo Here</div>`;
+
+                let detailsRows = `
+                    <tr><td>Full Name</td><td>${p.name}</td></tr>
+                    <tr><td>Profession</td><td>${p.title}</td></tr>
+                `;
+                p.details.forEach(d => {
+                    if (d.value.trim() !== "") {
+                        detailsRows += `<tr><td>${d.label}</td><td>${d.value}</td></tr>`;
+                    }
+                });
+
+                return `
+                <div style="width: 100%;">
+                    <div style="text-align: center; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; padding-bottom: 15px;">
+                        <h1 style="font-size: 2.5em; font-weight: 800; letter-spacing: 4px; color: ${hColor}; margin: 0;">BIO-DATA</h1>
+                    </div>
+                    <div style="display: flex; gap: 40px; flex-direction: ${flexDir}; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <table class="biodata-personal-table">
+                                ${detailsRows}
+                            </table>
+                        </div>
+                        <div style="flex-shrink: 0;">
+                            ${photoBox}
+                        </div>
+                    </div>
+                </div>`;
+            }
+            if(tpl === 'creative') {
+                let creativeContactHtml = p.details.filter(d => d.value.trim() !== "").map(d => `<div style="word-break: break-word; margin-bottom: 6px;"><span class="font-bold opacity-80">${d.label}:</span> ${d.value}</div>`).join('');
+                return `${photoHtml}<h1 style="font-size: 2.5em; font-weight: 800; line-height: 1.1; color: ${hColor}; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1><div style="font-size: 1.2em; font-weight: 500; color: inherit; opacity: 0.9; margin-top: 5px;">${p.title}</div><div style="font-size: 0.9em; margin-top: 20px; color: inherit; opacity: 0.8; display: flex; flex-direction: column; align-items: ${flexJustify}; text-align: ${align};">${creativeContactHtml}</div>`;
+            }
+            return `${photoHtml}<h1 style="font-size: 2.5em; font-weight: 800; line-height: 1.1; color: ${hColor}; word-break: keep-all; overflow-wrap: normal; word-wrap: normal;">${p.name}</h1><div style="font-size: 1.2em; font-weight: 500; color: inherit; opacity: 0.9; margin-top: 5px;">${p.title}</div><div style="font-size: 0.85em; margin-top: 12px; color: inherit; opacity: 0.7; display: flex; flex-wrap: wrap; gap: 5px; justify-content: ${flexJustify};">${contactHtml}</div>`;
+        }
+
+        function renderSectionContent(id, tpl) {
+            const s = data.sections[id];
+            if (!s) return '';
+            const f = s.format;
+            const contentAlign = f.align || 'left';
+            const titleAlign = f.titleAlign || 'left';
+            const spacing = f.spacing !== undefined ? f.spacing : 24;
+            const secColor = tpl === 'europass-standard' ? (data.personal.color || '#2563eb') : (s.color || '#000000');
+            
+            const contentStyle = `text-align: ${contentAlign}; font-weight: ${f.bold ? 'bold' : 'normal'}; font-style: ${f.italic ? 'italic' : 'normal'}; text-decoration: ${f.underline ? 'underline' : 'none'}; margin-bottom: ${spacing}px;`;
+
+            if (tpl === 'europass-standard') {
+                let innerContent = '';
+                if (s.type === 'list') {
+                     innerContent = s.items.map((item, i) => {
+                         const itemMargin = i === s.items.length - 1 ? 0 : 16;
+                         return `
+                         <div style="margin-bottom: ${itemMargin}px;">
+                            <div style="font-size: 0.85em; color: #64748b; margin-bottom: 2px; text-align: ${contentAlign};">${item.date}</div>
+                            <div style="font-size: 1.1em; font-weight: 700; color: #0f172a; text-align: ${contentAlign};">${item.title}</div>
+                            <div style="font-size: 0.95em; font-style: italic; color: #475569; margin-bottom: 6px; text-align: ${contentAlign};">${item.company}</div>
+                            <div style="font-size: 0.9em; color: #334155; line-height: 1.6; text-align: ${contentAlign}; white-space: pre-line;">${item.desc}</div>
+                         </div>`;
+                     }).join('');
+                } else if (s.type === 'tags') {
+                     const flexJustify = contentAlign === 'center' ? 'justify-center' : contentAlign === 'right' ? 'justify-end' : 'justify-start';
+                     innerContent = `<div class="flex flex-wrap gap-1 ${flexJustify}">`;
+                     s.content.split(',').forEach(tag => { if(tag.trim()) innerContent += `<span class="skill-tag">${tag.trim()}</span>`; });
+                     innerContent += `</div>`;
+                } else {
+                     innerContent = `<div style="white-space: pre-line; font-size: 0.95em; line-height: 1.7; color: #334155; text-align: ${contentAlign};">${s.content}</div>`;
+                }
+                
+                return `
+                <div class="cv-item avoid-break ${s.pageBreak ? 'force-page-break' : ''}" style="display: grid; grid-template-columns: 25% 75%; gap: 20px;">
+                    <div style="text-align: right; border-right: 1px solid #e2e8f0; padding-right: 20px; padding-bottom: ${spacing}px;">
+                        <div style="color: ${secColor}; font-weight: 700; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; text-align: right;">${s.name}</div>
+                    </div>
+                    <div style="padding-left: 0; padding-bottom: ${spacing}px; ${contentStyle}">
+                        ${innerContent}
+                    </div>
+                </div>`;
+            }
+            
+            // Skip the main section title if it's 'Profile' and we're in modern template, as the image hides the title "Summary" or "Profile"
+            let titleHtml = `<div class="cv-section-title" style="text-align: ${titleAlign} !important;">${s.name}</div>`;
+            if (tpl === 'modern' && s.name.toLowerCase() === 'profile' && s.column !== 'side') {
+                titleHtml = ''; 
+            }
+
+            if (tpl === 'biodata') {
+                let html = `<div class="cv-item avoid-break ${s.pageBreak ? 'force-page-break' : ''}" style="--section-color: ${secColor}; ${contentStyle}">`;
+                html += titleHtml;
+                
+                if (s.type === 'list') {
+                    if (s.name.toLowerCase().includes('education') || s.name.toLowerCase().includes('qualification')) {
+                        html += `<table class="biodata-table">
+                            <thead>
+                                <tr>
+                                    <th>Degree/Exam</th>
+                                    <th>Institution</th>
+                                    <th>Year</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${s.items.map(item => `
+                                <tr>
+                                    <td>${item.title}</td>
+                                    <td>${item.company}</td>
+                                    <td>${item.date}</td>
+                                    <td style="text-align: left;">${item.desc}</td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>`;
+                    } else {
+                        html += `<div style="padding-left: 0;">`;
+                        html += s.items.map((item, i) => `
+                            <div style="margin-bottom: ${i === s.items.length - 1 ? 0 : 16}px; display: flex; text-align: left;">
+                                <div style="font-weight: bold; margin-right: 12px; font-size: 1.05em;">${i + 1}.</div>
+                                <div>
+                                    <div style="margin-bottom: 4px;">
+                                        <strong style="font-size: 1.05em;">${item.title}</strong> at ${item.company} (${item.date}).
+                                    </div>
+                                    <div style="font-size: 0.95em; line-height: 1.6; opacity: 0.9;">${item.desc}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                        html += `</div>`;
+                    }
+                } else if (s.type === 'tags') {
+                    const flexJustify = contentAlign === 'center' ? 'justify-center' : contentAlign === 'right' ? 'justify-end' : 'justify-start';
+                    let tagsHtml = `<div class="flex flex-wrap gap-2 ${flexJustify}">`;
+                    s.content.split(',').forEach(tag => { if(tag.trim()) tagsHtml += `<span class="skill-tag" style="background:#f8fafc; padding:4px 10px; border-radius:4px; border:1px solid #cbd5e1; font-size: 0.9em;">${tag.trim()}</span>`; });
+                    tagsHtml += `</div>`;
+                    html += tagsHtml;
+                } else {
+                    html += `<div style="white-space: pre-line; font-size: 0.95em; line-height: 1.7; opacity: 0.9;">${s.content}</div>`;
+                }
+                html += `</div>`;
+                return html;
+            }
+
+            let html = `<div class="cv-item avoid-break ${s.pageBreak ? 'force-page-break' : ''}" style="--section-color: ${secColor}; ${contentStyle}">`;
+            html += titleHtml;
+            
+            if (s.type === 'list') {
+                html += s.items.map((item, i) => {
+                    const itemMargin = i === s.items.length - 1 ? 0 : 16;
+                    
+                    if(tpl === 'modern') {
+                        return `
+                        <div style="margin-bottom: ${itemMargin}px;">
+                            <div class="flex justify-between items-baseline mb-1">
+                                <strong style="font-size: 1.1em; color: #0f172a; text-align: ${contentAlign};">${item.title}</strong>
+                                <div style="font-size: 0.9em; font-weight: 600; color: var(--header-color); text-align: right; margin-left: 10px; white-space: nowrap;">${item.date}</div>
+                            </div>
+                            <div style="font-weight: 500; margin-bottom: 6px; font-size: 0.95em; color: #475569; text-align: ${contentAlign};">${item.company}</div>
+                            <div style="font-size: 0.95em; white-space: pre-line; color: #334155; text-align: ${contentAlign}; line-height: 1.6;">${item.desc}</div>
+                        </div>`;
+                    }
+                    if(tpl === 'academic') {
+                        return `
+                        <div class="cv-item-grid" style="margin-bottom: ${itemMargin}px; text-align: left;">
+                            <div class="item-date-col">${item.date}</div>
+                            <div>
+                                <strong style="font-size:1.1em; color: var(--section-color); text-align: ${contentAlign}; display: block;">${item.title}</strong>
+                                <div style="font-weight:600; margin-bottom: 5px; font-size:0.95em; text-align: ${contentAlign};">${item.company}</div>
+                                <div style="font-size:0.9em; white-space:pre-line; opacity: 0.9; text-align: ${contentAlign};">${item.desc}</div>
+                            </div>
+                        </div>`;
+                    }
+                    if(tpl === 'europass') {
+                        return `
+                        <div class="cv-item-grid" style="margin-bottom: ${itemMargin}px; text-align: left;">
+                            <div class="item-date-col">${item.date}</div>
+                            <div>
+                                <strong style="font-size:1.05em; color: inherit; text-align: ${contentAlign}; display: block;">${item.title}</strong>
+                                <div style="font-weight:600; margin-bottom: 5px; font-size:0.95em; text-align: ${contentAlign}; opacity: 0.9;">${item.company}</div>
+                                <div style="font-size:0.9em; white-space:pre-line; opacity: 0.85; text-align: ${contentAlign};">${item.desc}</div>
+                            </div>
+                        </div>`;
+                    }
+                    return `
+                    <div style="margin-bottom: ${itemMargin}px;">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <strong style="font-size: 1.05em; color: inherit; text-align: ${contentAlign}; flex: 1; word-break: break-word;">${item.title}</strong>
+                            <div style="font-size: 0.85em; font-weight: 600; color: var(--section-color); text-align: right; margin-left: 10px; white-space: nowrap;">${item.date}</div>
+                        </div>
+                        <div style="font-weight: 600; font-size: 0.95em; margin-bottom: 6px; opacity: 0.9; text-align: ${contentAlign};">${item.company}</div>
+                        <div style="font-size: 0.9em; white-space: pre-line; opacity: 0.85; text-align: ${contentAlign};">${item.desc}</div>
+                    </div>`;
+                }).join('');
+            } else if (s.type === 'tags') {
+                const flexJustify = contentAlign === 'center' ? 'justify-center' : contentAlign === 'right' ? 'justify-end' : 'justify-start';
+                let tagsHtml = `<div class="flex flex-wrap gap-1 ${flexJustify}">`;
+                s.content.split(',').forEach(tag => { if(tag.trim()) tagsHtml += `<span class="skill-tag">${tag.trim()}</span>`; });
+                tagsHtml += `</div>`;
+                html += tagsHtml;
+            } else {
+                let textHtml = `<div style="white-space: pre-line; font-size: 0.95em; line-height: 1.7; opacity: 0.9;">${s.content}</div>`;
+                html += textHtml;
+            }
+            html += `</div>`;
+            return html;
+        }
+
+        function render() {
+            const tpl = config.template;
+            let fullHtml = `<div class="cv-document template-${tpl}">`;
+            const isTwoCol = ['twocol', 'twocol-photo', 'creative', 'modern'].includes(tpl);
+            const headerColorVar = data.personal.color || '#2563eb';
+
+            if (tpl === 'modern') {
+                const p = data.personal;
+                let contactHtml = p.details.filter(d => d.value.trim() !== "").map(d => `
+                    <div style="margin-bottom: 12px; font-size: 0.9em; word-break: break-word;">
+                        ${d.value}
+                    </div>
+                `).join('');
+
+                let sideHtml = `
+                    <div class="cv-item avoid-break" style="margin-bottom: 24px;">
+                        <div class="cv-section-title">CONTACT</div>
+                        ${contactHtml}
+                    </div>
+                `;
+                
+                sectionOrder.forEach(id => { 
+                    if(data.sections[id] && data.sections[id].column === 'side') sideHtml += renderSectionContent(id, tpl); 
+                });
+
+                let mainHtml = `
+                    <div style="margin-bottom: 24px;">
+                        <h1 style="font-size: 3.2em; font-weight: 700; color: #0f172a; margin-bottom: 4px; line-height: 1.1; letter-spacing: -1px;">${p.name}</h1>
+                        <div style="font-size: 1.3em; font-weight: 500; color: var(--header-color); margin-bottom: 16px;">${p.title}</div>
+                    </div>
+                `;
+                
+                sectionOrder.forEach(id => { 
+                    if(data.sections[id] && data.sections[id].column !== 'side') mainHtml += renderSectionContent(id, tpl); 
+                });
+
+                fullHtml += `
+                    <div class="twocol-wrapper">
+                        <div class="col-side" style="width: 32%; padding: 20mm 10mm 20mm 20mm;">${sideHtml}</div>
+                        <div class="col-main" style="width: 68%; padding: 20mm 20mm 20mm 10mm;">${mainHtml}</div>
+                    </div>`;
+
+            } else if (tpl === 'creative') {
+                let sideHtml = `<div class="cv-header" style="--header-color: ${headerColorVar};">${renderHeaderContent(tpl)}</div>`;
+                sectionOrder.forEach(id => { if(data.sections[id] && data.sections[id].column === 'side') sideHtml += renderSectionContent(id, tpl); });
+                let mainHtml = '';
+                sectionOrder.forEach(id => { if(data.sections[id] && data.sections[id].column !== 'side') mainHtml += renderSectionContent(id, tpl); });
+                fullHtml += `
+                    <div class="twocol-wrapper">
+                        <div class="col-side" style="padding: 20mm 10mm 20mm 20mm;">${sideHtml}</div>
+                        <div class="col-main" style="padding: 20mm 20mm 20mm 10mm;">${mainHtml}</div>
+                    </div>`;
+            } else if (isTwoCol) {
+                fullHtml += `<div class="cv-header" style="--header-color: ${headerColorVar};">${renderHeaderContent(tpl)}</div>`;
+                let sideHtml = '', mainHtml = '';
+                sectionOrder.forEach(id => {
+                    if(data.sections[id] && data.sections[id].column === 'side') sideHtml += renderSectionContent(id, tpl);
+                    else if(data.sections[id]) mainHtml += renderSectionContent(id, tpl);
+                });
+                fullHtml += `
+                    <div class="twocol-wrapper">
+                        <div class="col-side" style="padding: 10mm 10mm 20mm 20mm;">${sideHtml}</div>
+                        <div class="col-main" style="padding: 10mm 20mm 20mm 10mm;">${mainHtml}</div>
+                    </div>`;
+            } else {
+                fullHtml += `<div class="cv-header" style="--header-color: ${headerColorVar};">${renderHeaderContent(tpl)}</div>`;
+                sectionOrder.forEach(id => { fullHtml += renderSectionContent(id, tpl); });
+            }
+
+            fullHtml += `</div>`;
+            document.getElementById('cv-target').innerHTML = fullHtml;
+            
+            triggerAutoSave();
+        }
+
+        function downloadPDF() {
+            document.body.classList.add('pdf-generating');
+            
+            const element = document.getElementById('cv-container');
+            const opt = {
+                margin:       0,
+                filename:     `${(data.personal.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['css', 'legacy'], avoid: ['.avoid-break'] }
+            };
+
+            const btn = document.getElementById('pdfBtn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = 'Generating...';
+            btn.classList.add('opacity-50', 'pointer-events-none');
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = origHTML;
+                btn.classList.remove('opacity-50', 'pointer-events-none');
+                document.body.classList.remove('pdf-generating');
+                
+                // Pop up the feedback form shortly after successful download
+                setTimeout(() => {
+                    openFeedbackModal();
+                }, 1000);
+            });
+        }
+
+        Sortable.create(document.getElementById('sectionSortable'), {
+            animation: 150,
+            handle: '.text-slate-300',
+            onEnd: () => {
+                sectionOrder = Array.from(document.querySelectorAll('.section-item')).map(el => el.dataset.id);
+                renderEditors();
+                render();
+            }
+        });
+
+        window.onload = () => {
+            loadAutoSave(); 
+            
+            // Explicitly check if current template requires the column settings on initial load
+            const isTwoCol = ['twocol', 'twocol-photo', 'creative', 'modern'].includes(config.template);
+            document.getElementById('colColorSettings').style.display = isTwoCol ? 'block' : 'none';
+            
+            updateStyle();
+            refreshUI();
+            
+            setTimeout(() => {
+                document.getElementById('save-ping').classList.add('hidden');
+                document.getElementById('save-status').textContent = 'Saved draft';
+            }, 500);
+        };
+    </script>
+</body>
+</html>
